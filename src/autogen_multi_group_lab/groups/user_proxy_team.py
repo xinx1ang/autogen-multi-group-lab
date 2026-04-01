@@ -1,4 +1,5 @@
 from ..agents.base import Agent
+from ..runtime.backend import BackendManager
 from ..runtime.schemas import FinalReport
 from .implementation_team import ImplementationTeam
 from .qa_team import QATeam
@@ -6,11 +7,12 @@ from .requirement_team import RequirementTeam
 
 
 class UserProxyTeam:
-    def __init__(self) -> None:
-        self.user_proxy = Agent("D-UserProxy", "UserProxy Agent")
-        self.requirement_team = RequirementTeam()
-        self.implementation_team = ImplementationTeam()
-        self.qa_team = QATeam()
+    def __init__(self, backend: BackendManager | None = None) -> None:
+        backend = backend or BackendManager()
+        self.user_proxy = Agent("D-UserProxy", "UserProxy Agent", backend=backend)
+        self.requirement_team = RequirementTeam(backend=backend)
+        self.implementation_team = ImplementationTeam(backend=backend)
+        self.qa_team = QATeam(backend=backend)
 
     def run(self, task: str) -> tuple[FinalReport, str]:
         print(self.user_proxy.say("Accepted the user task and dispatching to Requirement Team."))
