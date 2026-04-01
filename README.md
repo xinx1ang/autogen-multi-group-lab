@@ -45,13 +45,20 @@ python3 -m src.autogen_multi_group_lab.main --demo --backend autogen
 ```
 
 If `autogen-agentchat` / `autogen-core` are not installed or `OPENAI_API_KEY` is not set,
-the program will automatically fall back to the heuristic backend and print that status.
+the program will automatically fall back to the heuristic backend and print the exact reason.
 
-Or run with a custom task:
+## Environment status in this workspace
 
-```bash
-python3 -m src.autogen_multi_group_lab.main --task "Build a Python function that adds two numbers and provide tests" --backend heuristic
-```
+At the time of implementation in this environment:
+
+- `python3 -m pip` is unavailable
+- `ensurepip` is unavailable
+- `autogen-agentchat` is not installed
+- `autogen-core` is not installed
+- `OPENAI_API_KEY` is not set
+
+So the repository now supports AutoGen **integration points**,
+but this specific machine cannot yet run a real AutoGen-backed flow without external environment setup.
 
 ## What “接入 AutoGen” means here
 
@@ -60,9 +67,27 @@ This repository now includes an AutoGen-ready backend abstraction:
 - `heuristic` backend: always runnable locally
 - `autogen` backend: selected by CLI/env and routed through an adapter
 - graceful fallback when AutoGen dependencies are unavailable
+- fallback reason is surfaced in runtime output
 
-This is a practical integration step that preserves the same team interfaces,
+This preserves the same team interfaces,
 so real AutoGen conversational logic can be dropped into the adapter without rewriting the team pipeline.
+
+## To enable real AutoGen execution later
+
+Once the environment has package installation and an API key, the next steps are:
+
+1. install dependencies
+2. wire a real AutoGen model client into `autogen_adapter.py`
+3. replace placeholder `generate()` logic with real agent conversations
+4. run demo and capture traces/artifacts
+
+Example target commands for a fully provisioned environment:
+
+```bash
+python3 -m pip install autogen-agentchat autogen-core openai
+export OPENAI_API_KEY=...your_key...
+python3 -m src.autogen_multi_group_lab.main --demo --backend autogen
+```
 
 ## Repository structure
 

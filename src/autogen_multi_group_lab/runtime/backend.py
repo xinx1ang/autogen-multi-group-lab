@@ -14,9 +14,10 @@ class BackendManager:
 
     def describe(self) -> str:
         if self.requested == "autogen":
-            if self.autogen.is_available():
+            ok, reason = self.autogen.dependency_status()
+            if ok:
                 return f"autogen(model={self.autogen.model})"
-            return "heuristic(fallback-from-autogen-request)"
+            return f"heuristic(fallback-from-autogen-request:{reason})"
         return "heuristic"
 
     def generate(self, agent_name: str, role: str, prompt: str) -> str:
