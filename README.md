@@ -18,7 +18,7 @@ The goal is not only to show multiple agents talking, but to show **organized co
 
 ## Current status
 
-Runnable MVP with a backend abstraction.
+Runnable MVP with a backend abstraction and a real-model-ready AutoGen path.
 
 ## Features in the MVP
 
@@ -29,6 +29,7 @@ Runnable MVP with a backend abstraction.
 - built-in demo task
 - simple console logs for observability
 - **backend switch**: heuristic by default, AutoGen-style adapter path available
+- **real model call path** in `autogen_adapter.py` once dependencies and API key are present
 
 ## Quick start
 
@@ -49,43 +50,42 @@ the program will automatically fall back to the heuristic backend and print the 
 
 ## Environment status in this workspace
 
-At the time of implementation in this environment:
+Current progress in this machine:
 
-- `python3 -m pip` is unavailable
-- `ensurepip` is unavailable
-- `autogen-agentchat` is not installed
-- `autogen-core` is not installed
-- `OPENAI_API_KEY` is not set
+- `uv` has been installed locally for Python package management
+- project virtualenv `.venv` has been created
+- AutoGen/OpenAI package installation was started via `uv pip`
+- runtime fallback and reason display are already wired
 
-So the repository now supports AutoGen **integration points**,
-but this specific machine cannot yet run a real AutoGen-backed flow without external environment setup.
+If package installation finishes and `OPENAI_API_KEY` is set,
+`--backend autogen` will use a real model request path.
 
-## What “接入 AutoGen” means here
+## What “接入 AutoGen” means here now
 
-This repository now includes an AutoGen-ready backend abstraction:
+This repository now includes both:
 
-- `heuristic` backend: always runnable locally
-- `autogen` backend: selected by CLI/env and routed through an adapter
-- graceful fallback when AutoGen dependencies are unavailable
-- fallback reason is surfaced in runtime output
+1. **environment preparation work**
+   - local `uv` installation
+   - project `.venv`
+   - package install attempt for AutoGen dependencies
 
-This preserves the same team interfaces,
-so real AutoGen conversational logic can be dropped into the adapter without rewriting the team pipeline.
+2. **code-side real integration skeleton**
+   - `heuristic` backend: always runnable locally
+   - `autogen` backend: selected by CLI/env and routed through an adapter
+   - graceful fallback when AutoGen dependencies are unavailable
+   - fallback reason surfaced in runtime output
+   - real `OpenAI` model call path implemented in `autogen_adapter.py`
 
-## To enable real AutoGen execution later
+This means the project is no longer only "conceptually ready".
+The remaining runtime dependency is environment completion plus API key availability.
 
-Once the environment has package installation and an API key, the next steps are:
+## To enable real AutoGen execution
 
-1. install dependencies
-2. wire a real AutoGen model client into `autogen_adapter.py`
-3. replace placeholder `generate()` logic with real agent conversations
-4. run demo and capture traces/artifacts
-
-Example target commands for a fully provisioned environment:
+Once the environment has the required packages and an API key:
 
 ```bash
-python3 -m pip install autogen-agentchat autogen-core openai
 export OPENAI_API_KEY=...your_key...
+. .venv/bin/activate
 python3 -m src.autogen_multi_group_lab.main --demo --backend autogen
 ```
 
@@ -103,7 +103,7 @@ src/autogen_multi_group_lab/
 
 ## Planned next steps
 
-- replace placeholder adapter calls with real AutoGen agent conversations
+- replace one-shot backend calls with richer AutoGen multi-turn conversations
 - support tool-using execution and test running
 - add persistent run artifacts
 - add web UI / visualization if needed

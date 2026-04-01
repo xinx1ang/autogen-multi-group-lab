@@ -29,7 +29,25 @@ class AutoGenAdapter:
                 "AutoGen backend is not available: "
                 f"{reason}. Install autogen-agentchat/autogen-core and set OPENAI_API_KEY."
             )
-        return (
-            f"[{agent_name} | {role}] autogen-placeholder-response: "
-            f"{prompt.strip()}"
+
+        try:
+            from openai import OpenAI
+        except Exception as exc:
+            raise RuntimeError(f"OpenAI client import failed: {exc}") from exc
+
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        system_prompt = (
+            f"You are {agent_name}, acting as {role} in a multi-agent software-factory demo. "
+            "Reply concisely, practically, and in plain engineering language."
         )
+        response = client.responses.create(
+            model=self.model,
+            input=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+        )
+        text = getattr(response, "output_text", "").strip()
+        if not text:
+            text = "(empty model response)"
+        return f"[{agent_name} | {role}] {text}"
